@@ -1,0 +1,8 @@
+Submission
+
+Ready to submit your project? Collect the following files:
+
+A pdf document containing your answers to the rubric questions. This file should document your data wrangling process.
+Your Python code to the problem set questions.
+A text file containing a link to the map position you wrangled in your project, a short description of the area and a reason for your choice.
+A text file containing a list of Web sites, books, forums, blog posts, github repositories etc that you referred to or used in this submission (Add N/A if you did not use such resources).
