@@ -11,7 +11,7 @@ from collections import defaultdict
 import os
 #Set the proper current working directory
 os.getcwd()
-os.chdir('C:/Users/user/version-control/Data-Wrangle-OpenStreetMaps-MongoDB')
+os.chdir('C:/Users/user/version-control/Project-2-Data-Wrangling-with-MongoDB')
 
 def count_tags(filename):
     '''Iterate through each element in the file and add the relevant node name to a dictionary

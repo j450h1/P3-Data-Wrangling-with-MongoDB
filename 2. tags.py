@@ -23,7 +23,7 @@ Please complete the function 'key_type'.
 import os
 #Set the proper current working directory
 os.getcwd()
-os.chdir('C:/Users/user/version-control/Data-Wrangle-OpenStreetMaps-MongoDB')
+os.chdir('C:/Users/user/version-control/Project-2-Data-Wrangling-with-MongoDB')
 
 #create the three regular expressions we are checking for
 lower = re.compile(r'^([a-z]|_)*$')
@@ -43,6 +43,7 @@ def key_type(element, keys):
             print element.attrib['k']            
         else:
             keys['other'] += 1                 
+    
     return keys
 
 def process_map(filename):
@@ -60,6 +61,7 @@ pprint.pprint(keys)
 #RESULT
 #bitcoin=yes
 #contact"email
+#Will ignore these two problemchars in 5. data.py
 #{'lower': 574368, 'lower_colon': 448514, 'other': 44552, 'problemchars': 2}
 
 

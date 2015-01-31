@@ -17,7 +17,7 @@ The function process_map should return a set of unique user IDs ("uid")
 import os
 #Set the proper current working directory
 os.getcwd()
-os.chdir('C:/Users/user/version-control/Data-Wrangle-OpenStreetMaps-MongoDB')
+os.chdir('C:/Users/user/version-control/Project-2-Data-Wrangling-with-MongoDB')
 
 def process_map(filename):
     users = set()

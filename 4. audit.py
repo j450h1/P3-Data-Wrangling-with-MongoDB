@@ -23,7 +23,8 @@ import pprint
 import os
 #Set the proper current working directory
 os.getcwd()
-os.chdir('C:/Users/user/version-control/Data-Wrangle-OpenStreetMaps-MongoDB')
+os.chdir('C:/Users/user/version-control/Project-2-Data-Wrangling-with-MongoDB
+')
 
 OSMFILE = "GVRD - Vancouver - OSM XML Raw.osm"
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
@@ -31,34 +32,7 @@ street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road", 
             "Trail", "Parkway", "Commons"]
 
-# UPDATE THIS VARIABLE
-#mapping = { "St.": "Street",
-#            "St": "Street",
-#            "st": "Street",
-#            "street": "Street",
-#            "Street3": "Street",
-#            "Blvd": "Boulevard",            
-#            "Ave": "Avenue",
-#            "RD": "Road",
-#            "Rd": "Road",
-#            "Rd.": "Road",
-#            "road": "Road",
-#            "Road,": "Road",
-#            "Dr": "Drive",
-#            "Dr.": "Drive",
-#            "Ave.": "Avenue", # combined all Avenues
-#            "av" : "Avenue",
-#            "S.": "South",
-#            "Hwy.": "Highway",
-#            "Hwy": "Highway",            
-#            "Edmonds": "Edmonds Street",
-#            "Hastings": "Hastings Street",
-#            "Willingdon" : "Willingdon Avenue",
-#            "Pender": "Pender Street",
-#            "Moncton": "Moncton Street",
-#            "77A": "77A Avenue" 
-#            }
-           
+# UPDATE THIS VARIABLE           
 mapping = {'10': '10',
            '3305': '3305',
            '32500': '32500',
@@ -97,7 +71,7 @@ mapping = {'10': '10',
            'Rd.': 'Road',
            'Road,': 'Road',
            'S.': 'South',
-           'Sanders': 'Sanders',
+           'Sanders': 'Sanders Street',
            'South': 'South',
            'St': 'Street',
            'St.': 'Street',
@@ -115,15 +89,16 @@ mapping = {'10': '10',
            'st': 'Street',
            'street': 'Street',
            }
-#must be done After the street name changes above. 
-changes = { 'ing George Highway': 'King George Boulevard',
-           'W15th Street': 'W 15th Street',
+#gotten from looking at the results of the audit
+#difference between mapping and changes is we are looking at the entire value in changes and not just the last word. see data.py
+changes = { 'ing George Hwy.': 'King George Boulevard',
+           'W15th st': 'W 15th Street',
            'Howe St. Vancouver': 'Howe Street',
            'W. Hastings St. Vancouver': 'West Hastings Street',
            'Expo Blvd, #3305': 'Expo Boulevard'            
-            }         
-            
-delete = ["Tsawwassen","Park","Terminal","Sanders","8500"]
+           ' Beatty St': 'Beatty Street'}         
+#skip are the full values gotten from looking at the results of the audit that we don't want to include in the database
+skip = ["10","32500","99","Tsawwassen","Park","Terminal","8500"]
 
 def audit_street_type(street_types, street_name):
     m = street_type_re.search(street_name)
