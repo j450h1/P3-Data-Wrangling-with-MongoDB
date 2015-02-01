@@ -19,7 +19,6 @@ mongoimport later on to import the shaped data into MongoDB. You could also do s
 before doing that, like in the previous exercise, but for this exercise you just have to
 shape the structure.
 """
-
 import os
 #Set the proper current working directory
 os.getcwd()
@@ -30,6 +29,8 @@ problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 double_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*:([a-z]|_)*$')
 #the street type ending, example street, st., road
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE) 
+#needed to check if lower_colon in name
+lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 #skip,changes, and mapping retrieved from looking at the results of audit.py
 skip = ["10","32500","99","Tsawwassen","Park","Terminal","8500"]
 changes = { 'ing George Hwy.': 'King George Boulevard',
@@ -108,102 +109,40 @@ mapping = {'10': '10',
 def update_name(name, mapping):
     '''Update each street name with the replacement ending in the mapping dictionary'''
     match = re.search(street_type_re,name)
-    name = re.sub(street_type_re,mapping[match.group()],name)
-    return name
-#
-#file_in = 'GVRD - Vancouver - OSM XML Raw.osm'
-#data = list()
-#counter = 0
-##skip_counter = 0    
-##len(data) = 1538286 unique nodes and ways
-##4197699 total elements
-#for _, element in ET.iterparse(file_in):
-#    if element.tag == "node" or element.tag == "way":
-#        node = {}
-#        node['pos'] = [float(1),float(1)]
-#        node['type'] = element.tag          
-#        for attrName, attrValue in element.attrib.items():
-#            if attrName == "lat" or attrName == "lon": #pos
-#                if attrName == "lat":
-#                    node['pos'][0] = float(attrValue)
-#                if attrName == "lon":
-#                    node['pos'][1] = float(attrValue)            
-#            if attrName == "" or attrValue == "": #make sure no empty tags get copied over 
-#                    continue
-#            node[attrName] = attrValue
-#        #2nd level 'nd' or 'tag' tags     
-#        ndtags = element.findall("./*")        
-#        for ndtag in ndtags:
-#            kvalue, vvalue, refvalue, refname = ["","","",""]
-#            for aName, aValue in ndtag.attrib.items():
-#                if aName == "k":
-#                    #print "k"
-#                    kvalue = aValue
-#                if aName == "v":
-#                    #print "v"
-#                    vvalue = aValue
-#                if aName == "ref":
-#                    refvalue = aValue
-#                    refname = aName #should be 'ref'
-##            #print "2nd level"  
-##            print kvalue
-##            print vvalue
-##            print refvalue
-#            dc = double_colon.search(kvalue)
-#            pc = problemchars.search(kvalue)
-#            #if second level tag "k" value contains problematic characters, it should be ignored
-#            if pc is not None or dc is not None: #bitcoin=yes & contact"email from tags.py and ignore double colons
-#                print "pced or dced"                
-#                continue 
-#            if vvalue in skip:# it is one of the skipped words found in the audit:
-#                print "skipped"                
-#                continue
-#            if vvalue in changes: #it is one of the words we need to rename for various reasons typos, extra spaces etc.
-#                print "changed"                
-#                vvalue = changes[vvalue]
-#            if kvalue.startswith("addr:"):
-#                #Change all street endings to the better name
-#                if kvalue == "addr:street": #is a street function from audit
-#                    vvalue = update_name(vvalue, mapping)
-#                if 'address' not in node.keys(): #this would be the first tag if there are multiple tags               
-#                    node['address'] = {}
-#                node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street' 
-#            elif element.tag == "way" and refname == "ref": #if it is a way and references nodes
-#                if "node_refs" not in node.keys():
-#                    node['node_refs'] = []
-#                print "reffed"
-#                node["node_refs"].append(refvalue)
-#            else: #this is executed for both ways and nodes
-#                if kvalue == "" or vvalue == "": #make sure no empty tags get copied over 
-#                    continue
-#                node[kvalue] = vvalue
-#                print kvalue 
-#                print vvalue 
-#                print refvalue
-#                print refname 
-#        data.append(node)
-#    #    counter += 1
-#    #   print counter #gives an idea of the progress of the task
-#    element.clear()
+    if match:
+        name = re.sub(street_type_re,mapping[match.group()],name)
+        return name
+    else:
+        return name
 
-def shape_element(element):
+file_in = 'GVRD - Vancouver - OSM XML Raw.osm' ; file_in = 'sample.osm'
+data = list()
+counter = 0
+#skip_counter = 0    
+#len(data) = 1538286 unique nodes and ways
+#4197699 total elements
+for _, element in ET.iterparse(file_in):
     if element.tag == "node" or element.tag == "way":
         node = {}
-        node['pos'] = [float(1),float(1)]
         node['type'] = element.tag          
         for attrName, attrValue in element.attrib.items():
-            if attrName == "lat" or attrName == "lon": #pos
-                if attrName == "lat":
-                    node['pos'][0] = float(attrValue)
-                if attrName == "lon":
-                    node['pos'][1] = float(attrValue)            
-            if attrName == "" or attrValue == "": #make sure no empty tags get copied over 
-                    continue
+            if attrName == "lat":
+                if 'pos' not in node.keys():
+                    node['pos']= [float(1),float(1)]
+                node['pos'][0] = float(attrValue)
+                continue
+            if attrName == "lon":
+                if 'pos' not in node.keys():
+                    node['pos']= [float(1),float(1)]
+                node['pos'][1] = float(attrValue)
+                continue
+            if attrName == "" or attrValue == "":
+               continue
             node[attrName] = attrValue
-        #2nd level 'nd' or 'tag' tags     
-        ndtags = element.findall("./*")        
+        #print node
+        ndtags = element.findall("./*")
         for ndtag in ndtags:
-            kvalue, vvalue, refvalue, refname = ["","","",""]
+            kvalue, vvalue, refvalue, refname = ['','','','']
             for aName, aValue in ndtag.attrib.items():
                 if aName == "k":
                     #print "k"
@@ -214,46 +153,117 @@ def shape_element(element):
                 if aName == "ref":
                     refvalue = aValue
                     refname = aName #should be 'ref'
-#            #print "2nd level"  
-#            print kvalue
-#            print vvalue
-#            print refvalue
-            dc = double_colon.search(kvalue)
-            pc = problemchars.search(kvalue)
+            #print kvalue, vvalue, refvalue, refname
+            if element.tag == "way" and refvalue: #if it is a way and references nodes
+                if "node_refs" not in node.keys():
+                    node['node_refs'] = []
+                print "reffed"
+                node["node_refs"].append(refvalue)
+            #print node
+            dc,pc,lc = [double_colon.search(kvalue),problemchars.search(kvalue),lower_colon.search(kvalue)]
             #if second level tag "k" value contains problematic characters, it should be ignored
             if pc or dc: #bitcoin=yes & contact"email from tags.py and ignore double colons
                 print "pced or dced"                
                 continue 
             if vvalue in skip:# it is one of the skipped words found in the audit:
-#                print "skipped"                
+                print "skipped"                
                 continue
             if vvalue in changes: #it is one of the words we need to rename for various reasons typos, extra spaces etc.
-#                print "changed"                
+                print "changed"                
                 vvalue = changes[vvalue]
             if kvalue.startswith("addr:"):
-                #Change all street endings to the better name
+                print "starts with addr:"
                 if kvalue == "addr:street": #is a street function from audit
-                    vvalue = update_name(vvalue, mapping)
+                    print "is a street type:"
+                    vvalue = update_name(vvalue, mapping)                    
                 if 'address' not in node.keys(): #this would be the first tag if there are multiple tags               
                     node['address'] = {}
-                node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street' 
-            elif element.tag == "way" and refname == "ref": #if it is a way and references nodes
-                if "node_refs" not in node.keys():
-                    node['node_refs'] = []
-#                print "reffed"
-                 node["node_refs"].append(refvalue)
-            else: #this is executed for both ways and nodes
-                if kvalue == "" or vvalue == "": #make sure no empty tags get copied over 
-                    continue
+                node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street'         
+                continue
+            if lc: #example geobase:acquisitionTechnique:
+                print "there is a colon in this field"
+                kvalue = re.sub(":"," ",kvalue) #replace the colon with an empty space
                 node[kvalue] = vvalue
-#                print kvalue 
-#                print vvalue 
-#                print refvalue
-#                print refname 
-        return node
-    else:
-        return None
+                continue
+            if kvalue == "" or vvalue == "":
+                continue
+            node[kvalue] = vvalue
+            continue
+        pprint.pprint(node)
+        print counter
+        counter += 1 
+        data.append(node)  
+    #element.clear()
+pprint.pprint(data)
 
+for _, element in ET.iterparse(file_in):
+    if element.tag == "node" or element.tag == "way":
+        node = {}
+        node['type'] = element.tag          
+        for attrName, attrValue in element.attrib.items():
+            if attrName == "lat" or attrName == "lon": #pos
+                if 'pos' not in node.keys():
+                    node['pos']= [float(1),float(1)]
+                if attrName == "lat":
+                    node['pos'][0] = float(attrValue)
+                if attrName == "lon":
+                    node['pos'][1] = float(attrValue)            
+            if attrName == "" or attrValue == "": #make sure no empty tags get copied over 
+                continue
+            else:            
+                
+        data.append(node)
+
+        #2nd level 'nd' or 'tag' tags     
+        ndtags = element.findall("./*")
+        #print ndtags                
+        for ndtag in ndtags:
+            #print ndtag
+            kvalue, vvalue, refvalue, refname = ['','','','']
+            for aName, aValue in ndtag.attrib.items():
+                if aName == "k":
+                    #print "k"
+                    kvalue = aValue
+                if aName == "v":
+                    #print "v"
+                    vvalue = aValue
+                if aName == "ref":
+                    refvalue = aValue
+                    refname = aName #should be 'ref'
+            #print kvalue, vvalue, refvalue, refname
+            node[kvalue] = vvalue
+#        print node
+#        data.append(node)
+            if kvalue and vvalue:
+                if kvalue.startswith("addr:"):
+                #Change all street endings to the better name 
+                    if kvalue == "addr:street": #is a street function from audit
+                        vvalue = update_name(vvalue, mapping)                    
+                    if 'address' not in node.keys(): #this would be the first tag if there are multiple tags               
+                        node['address'] = {}
+                    node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street' 
+                elif lc: #example geobase:acquisitionTechnique:
+                    kvalue = re.sub(":"," ",kvalue) #replace the colon with an empty space
+                    node[kvalue] = vvalue
+                else:
+                    node[kvalue] = vvalue
+                    print "Uncle Joey"
+                    print node
+            counter += 1
+            print counter #gives an idea of the progress of the task  
+    else:
+        pass
+    counter += 1
+    print counter #gives an idea of the progress of the task   
+    element.clear()
+
+def shape_element(element):
+    
+
+
+
+
+            
 def process_map(file_in, pretty = False):
     # You do not need to change this file
     file_out = "{0}.json".format(file_in)
@@ -273,6 +283,6 @@ def process_map(file_in, pretty = False):
             element.clear()
     return data
 
-data = process_map('GVRD - Vancouver - OSM XML Raw.osm', False)
+data = process_map(file_in, False)
 pprint.pprint(data)
 

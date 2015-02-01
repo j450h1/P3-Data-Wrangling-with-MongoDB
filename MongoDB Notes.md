@@ -1,3 +1,4 @@
+
 Introduction
 
 The Greater Vancouver area of around 2.4 million inhabitants is the third most populous metropolitan area in the country and the most populous in Western Canada. 
@@ -41,8 +42,8 @@ I need to rename the whole thing. For no
 For something ambigious like this, I have chosen to delete this record since it is too vague.
 'Park': set(['Park']),
 
-
-
+ However, before doing that I looked through the data to find if I could see from the other tags and context what it could be renamed to.
+skip = ["Tsawwassen","Park","Terminal","Sanders","8500"]
 
 
 2. Retrieval Date and Time. Check the XML file.
