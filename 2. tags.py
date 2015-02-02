@@ -7,19 +7,7 @@ Created on Thu Jan 29 23:21:48 2015
 import xml.etree.ElementTree as ET
 import pprint
 import re
-"""
-Your task is to explore the data a bit more.
-Before you process the data and add it into MongoDB, you should
-check the "k" value for each "<tag>" and see if they can be valid keys in MongoDB,
-as well as see if there are any other potential problems.
 
-We have provided you with 3 regular expressions to check for certain patterns
-in the tags. As we saw in the quiz earlier, we would like to change the data model
-and expand the "addr:street" type of keys to a dictionary like this:
-{"address": {"street": "Some value"}}
-So, we have to see if we have such tags, and if we have any tags with problematic characters.
-Please complete the function 'key_type'.
-"""
 import os
 #Set the proper current working directory
 os.getcwd()
@@ -63,9 +51,3 @@ pprint.pprint(keys)
 #contact"email
 #Will ignore these two problemchars in 5. data.py
 #{'lower': 574368, 'lower_colon': 448514, 'other': 44552, 'problemchars': 2}
-
-
-import send_text_message
-message = "Python script is complete. Get back to the computer!"
-send_text_message.send_text(message)
-

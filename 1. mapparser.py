@@ -31,8 +31,3 @@ pprint.pprint(tags)
 
 #RESULT
 #defaultdict(<type 'int'>, {'node': 1365649, 'member': 19001, 'nd': 1570966, 'tag': 1067436, 'note': 1, 'meta': 1, 'relation': 2007, 'way': 172637, 'osm': 1})
-
-
-import send_text_message
-message = "Python script is complete. Get back to the computer!"
-send_text_message.send_text(message)

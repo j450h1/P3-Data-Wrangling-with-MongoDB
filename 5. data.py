@@ -5,7 +5,7 @@ Created on Fri Jan 30 16:10:45 2015
 @author: user
 """
 import xml.etree.ElementTree as ET
-import pprint
+#import pprint
 import re
 import codecs
 import json
@@ -113,17 +113,97 @@ def update_name(name, mapping):
         name = re.sub(street_type_re,mapping[match.group()],name)
         return name
     else:
-        return name
+        print "didn't get updated to a better name."
 
-file_in = 'GVRD - Vancouver - OSM XML Raw.osm' ; file_in = 'sample.osm'
-data = list()
-counter = 0
-#skip_counter = 0    
+#file_in = 'GVRD - Vancouver - OSM XML Raw.osm' 
+file_in = 'sample.osm'
+#data = list()
+#counter = 0
+#skip_counter = 0 
+#1538286 documents imported into Mongo  
 #len(data) = 1538286 unique nodes and ways
-#4197699 total elements
-for _, element in ET.iterparse(file_in):
+#4197699 total elements(any type of 1st level tag)
+#for _, element in ET.iterparse(file_in):
+#    if element.tag == "node" or element.tag == "way":
+#        node = {}
+#        node['type'] = element.tag          
+#        for attrName, attrValue in element.attrib.items():
+#            if attrName == "lat":
+#                if 'pos' not in node.keys():
+#                    node['pos']= [float(1),float(1)]
+
+#                node['pos'][0] = float(attrValue)
+#                continue
+#            if attrName == "lon":
+#                if 'pos' not in node.keys():
+#                    node['pos']= [float(1),float(1)]
+#                node['pos'][1] = float(attrValue)
+#                continue
+#            if attrName == "" or attrValue == "":
+#               continue
+#            node[attrName] = attrValue
+#        #print node
+#        ndtags = element.findall("./*")
+#        for ndtag in ndtags:
+#            kvalue, vvalue, refvalue = ['','','']
+#            for aName, aValue in ndtag.attrib.items():
+#                if aName == "k":
+#                    kvalue = aValue
+#                if aName == "v":
+#                    vvalue = aValue
+#                if aName == "ref":
+#                    refvalue = aValue
+#            #print kvalue, vvalue, refvalue
+#            if element.tag == "way" and refvalue: #if it is a way and references nodes
+#                if "node_refs" not in node.keys():
+#                    node['node_refs'] = []
+#                print "reffed"
+#                node["node_refs"].append(refvalue)
+#            #print node
+#            dc,pc,lc = [double_colon.search(kvalue),problemchars.search(kvalue),lower_colon.search(kvalue)]
+#            #if second level tag "k" value contains problematic characters, it should be ignored
+#            if pc or dc: #bitcoin=yes & contact"email from tags.py and ignore double colons
+#                print "pced or dced"                
+#                continue 
+#            if vvalue in skip:# it is one of the skipped words found in the audit:
+#                print "skipped"                
+#                continue
+#            if vvalue in changes: #it is one of the words we need to rename for various reasons typos, extra spaces etc.
+#                print "changed"                
+#                vvalue = changes[vvalue]
+#            if kvalue.startswith("addr:"):
+#                print "starts with addr:"
+#                if kvalue == "addr:street": #is a street function from audit
+#                    print "is a street type:"
+#                    vvalue = update_name(vvalue, mapping)                    
+#                if 'address' not in node.keys(): #this would be the first tag if there are multiple tags               
+#                    node['address'] = {}
+#                node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street'         
+#                continue
+#            if lc: #example geobase:acquisitionTechnique:
+#                print "there is a colon in this field"
+#                kvalue = re.sub(":"," ",kvalue) #replace the colon with a space
+#                node[kvalue] = vvalue
+#                continue
+#            if kvalue == "" or vvalue == "": #avoid blank fields
+#                continue
+#            node[kvalue] = vvalue
+#            continue
+#        #pprint.pprint(node)
+#        print counter
+#        counter += 1 
+#        data.append(node)  
+##pprint.pprint(data)
+
+def shape_element(element):
+    """Takes a top level element or tag such as way, node, etc and iterates through each element
+    and 2nd level tag (if applicable). Returns one cleaned
+    node (could be a 'way' as well) which is a dictionary of all the fields later 
+    to be converted to a JSON document.    
+    """
     if element.tag == "node" or element.tag == "way":
         node = {}
+        #1st level tags
         node['type'] = element.tag          
         for attrName, attrValue in element.attrib.items():
             if attrName == "lat":
@@ -136,29 +216,28 @@ for _, element in ET.iterparse(file_in):
                     node['pos']= [float(1),float(1)]
                 node['pos'][1] = float(attrValue)
                 continue
-            if attrName == "" or attrValue == "":
-               continue
+            if attrName == "" or attrValue == "": #avoid importing any blank keys or values
+                continue
+            if attrName == 'id': #id is a first level attribute
+                node['_id'] = attrValue #doing this ensures this _id replaces ObjectId in mongoDB when importing
+                continue
             node[attrName] = attrValue
-        #print node
+        #2nd level tags
         ndtags = element.findall("./*")
-        for ndtag in ndtags:
-            kvalue, vvalue, refvalue, refname = ['','','','']
-            for aName, aValue in ndtag.attrib.items():
+        for ndtag in ndtags: #iterate through each 2nd level tag
+            kvalue, vvalue, refvalue = ['','','']
+            for aName, aValue in ndtag.attrib.items(): #iterate through each tag to extract all 3 possible attributes 
                 if aName == "k":
-                    #print "k"
                     kvalue = aValue
                 if aName == "v":
-                    #print "v"
                     vvalue = aValue
                 if aName == "ref":
                     refvalue = aValue
-                    refname = aName #should be 'ref'
-            #print kvalue, vvalue, refvalue, refname
-            if element.tag == "way" and refvalue: #if it is a way and references nodes
-                if "node_refs" not in node.keys():
-                    node['node_refs'] = []
-                print "reffed"
-                node["node_refs"].append(refvalue)
+            #print kvalue, vvalue, refvalue
+            print kvalue
+            if kvalue == 'type': #there are some values that already have a type - this ensures only way and node types are not overridden
+                print 'type skipped'                
+                continue
             #print node
             dc,pc,lc = [double_colon.search(kvalue),problemchars.search(kvalue),lower_colon.search(kvalue)]
             #if second level tag "k" value contains problematic characters, it should be ignored
@@ -173,102 +252,42 @@ for _, element in ET.iterparse(file_in):
                 vvalue = changes[vvalue]
             if kvalue.startswith("addr:"):
                 print "starts with addr:"
-                if kvalue == "addr:street": #is a street function from audit
+                if kvalue == "addr:street": #same as is a street function from audit
                     print "is a street type:"
                     vvalue = update_name(vvalue, mapping)                    
                 if 'address' not in node.keys(): #this would be the first tag if there are multiple tags               
                     node['address'] = {}
                 node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street'         
                 continue
-            if lc: #example geobase:acquisitionTechnique:
+            if lc: #if any all lower character fields with a colon in them 
                 print "there is a colon in this field"
-                kvalue = re.sub(":"," ",kvalue) #replace the colon with an empty space
+                kvalue = re.sub(":"," ",kvalue) #replace the colon with an space
+                print "better k-value is ", kvalue
                 node[kvalue] = vvalue
                 continue
-            if kvalue == "" or vvalue == "":
+            if kvalue.startswith("geobase:"): #example geobase:acquisitionTechnique - lower_colon byitself is not good enough because capital "T"            
+                kvalue = kvalue.split("geobase:")[1] #remove the geobase section
+                node[kvalue] = vvalue
+                continue                
+            if kvalue == "" or vvalue == "": #avoid blank fields
                 continue
+            if element.tag == "way" and refvalue != "" : #if it is a way and references nodes
+                if "node_refs" not in node.keys():
+                    node['node_refs'] = []
+                print "reffed"
+                node["node_refs"].append(refvalue)
             node[kvalue] = vvalue
-            continue
-        pprint.pprint(node)
-        print counter
-        counter += 1 
-        data.append(node)  
-    #element.clear()
-pprint.pprint(data)
-
-for _, element in ET.iterparse(file_in):
-    if element.tag == "node" or element.tag == "way":
-        node = {}
-        node['type'] = element.tag          
-        for attrName, attrValue in element.attrib.items():
-            if attrName == "lat" or attrName == "lon": #pos
-                if 'pos' not in node.keys():
-                    node['pos']= [float(1),float(1)]
-                if attrName == "lat":
-                    node['pos'][0] = float(attrValue)
-                if attrName == "lon":
-                    node['pos'][1] = float(attrValue)            
-            if attrName == "" or attrValue == "": #make sure no empty tags get copied over 
-                continue
-            else:            
-                
-        data.append(node)
-
-        #2nd level 'nd' or 'tag' tags     
-        ndtags = element.findall("./*")
-        #print ndtags                
-        for ndtag in ndtags:
-            #print ndtag
-            kvalue, vvalue, refvalue, refname = ['','','','']
-            for aName, aValue in ndtag.attrib.items():
-                if aName == "k":
-                    #print "k"
-                    kvalue = aValue
-                if aName == "v":
-                    #print "v"
-                    vvalue = aValue
-                if aName == "ref":
-                    refvalue = aValue
-                    refname = aName #should be 'ref'
-            #print kvalue, vvalue, refvalue, refname
-            node[kvalue] = vvalue
-#        print node
-#        data.append(node)
-            if kvalue and vvalue:
-                if kvalue.startswith("addr:"):
-                #Change all street endings to the better name 
-                    if kvalue == "addr:street": #is a street function from audit
-                        vvalue = update_name(vvalue, mapping)                    
-                    if 'address' not in node.keys(): #this would be the first tag if there are multiple tags               
-                        node['address'] = {}
-                    node['address'][kvalue.split("addr:")[1]] = vvalue #pick the second item[0,1] out of this split k value which is for example 'street' 
-                elif lc: #example geobase:acquisitionTechnique:
-                    kvalue = re.sub(":"," ",kvalue) #replace the colon with an empty space
-                    node[kvalue] = vvalue
-                else:
-                    node[kvalue] = vvalue
-                    print "Uncle Joey"
-                    print node
-            counter += 1
-            print counter #gives an idea of the progress of the task  
+        #pprint.pprint(node)
+        return node
     else:
-        pass
-    counter += 1
-    print counter #gives an idea of the progress of the task   
-    element.clear()
+        return None
 
-def shape_element(element):
-    
-
-
-
-
-            
 def process_map(file_in, pretty = False):
+    
     # You do not need to change this file
     file_out = "{0}.json".format(file_in)
     data = []
-    counter = 0
+    counter = 0 #added counter to show status when creating json file
     with codecs.open(file_out, "w") as fo:
         for _, element in ET.iterparse(file_in):
             el = shape_element(element)
@@ -280,9 +299,7 @@ def process_map(file_in, pretty = False):
                     fo.write(json.dumps(el, indent=2)+"\n")
                 else:
                     fo.write(json.dumps(el) + "\n")
-            element.clear()
     return data
 
 data = process_map(file_in, False)
-pprint.pprint(data)
 
