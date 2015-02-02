@@ -17,6 +17,8 @@ Different forms of Street Names.
 
 Ave, Ave. transformed to Avenue
 
+_change id to _id so it will replace objectid
+
 West Broadway - I thought it was missing Street. To my surprise, after confirming from Google Maps Street is not on the official map and Broadway must be a street type.
 
 Typos in the name:
@@ -26,9 +28,27 @@ Since I've travelled on this Highway I know two things.
 First of all, it should be King George and I also know they recently renamed it
 to King George Boulevard. 
 
+> db.van.find({id: {$exists: 1 }}).count()
+1538286
+
 Another interesting discovery was that Wynd is also a street type. 
 
 Arbutus Wynd - Wynd': set(['Arbutus Wynd']),
+
+'geobase:acquisitionTechnique': 'GPS',
+ 'geobase:datasetName':
+
+mongoimport --stopOnError --db osm --collection van < Vancouver.json
+
+type was getting overriden by a tag that had that field already.
+Push the type to near the end of the script so its not overwritten.
+
+
+geobase:routeName1:en
+
+double colon didn't work
+
+need to remove colon
 
 Kingsway is another interesting one as there is no street type. The 'way' is included in the one name itself.
 
@@ -77,6 +97,8 @@ Number of documents  -  db.van.find().count()
 Number of nodes -		db.van.find( { "type" : "node"} ).count()
 
 Number of ways -		db.van.find( { "type" : "way"} ).count()
+
+only 2 ways formatted correctly?
 
 Number of unique users - db.van.distinct({"created.user"}).length()
 

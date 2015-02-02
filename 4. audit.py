@@ -4,7 +4,6 @@ Created on Fri Jan 30 01:34:32 2015
 @author: user
 """
 
-
 import xml.etree.cElementTree as ET
 from collections import defaultdict
 import re
@@ -13,8 +12,7 @@ import pprint
 import os
 #Set the proper current working directory
 os.getcwd()
-os.chdir('C:/Users/user/version-control/Project-2-Data-Wrangling-with-MongoDB
-')
+os.chdir('C:/Users/user/version-control/Project-2-Data-Wrangling-with-MongoDB')
 
 OSMFILE = "GVRD - Vancouver - OSM XML Raw.osm"
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
@@ -81,14 +79,14 @@ mapping = {'10': '10',
            }
 #gotten from looking at the results of the audit
 #difference between mapping and changes is we are looking at the entire value in changes and not just the last word. see data.py
-changes = { 'ing George Hwy.': 'King George Boulevard',
-           'W15th st': 'W 15th Street',
-           'Howe St. Vancouver': 'Howe Street',
-           'W. Hastings St. Vancouver': 'West Hastings Street',
-           'Expo Blvd, #3305': 'Expo Boulevard'            
-           ' Beatty St': 'Beatty Street'}         
-#skip are the full values gotten from looking at the results of the audit that we don't want to include in the database
-skip = ["10","32500","99","Tsawwassen","Park","Terminal","8500"]
+#changes = { 'ing George Hwy.': 'King George Boulevard',
+#           'W15th st': 'W 15th Street',
+#           'Howe St. Vancouver': 'Howe Street',
+#           'W. Hastings St. Vancouver': 'West Hastings Street',
+#           'Expo Blvd, #3305': 'Expo Boulevard'            
+#           ' Beatty St': 'Beatty Street'}         
+##skip are the full values gotten from looking at the results of the audit that we don't want to include in the database. Will use in data.py
+#skip = ["10","32500","99","Tsawwassen","Park","Terminal","8500"]
 
 def audit_street_type(street_types, street_name):
     m = street_type_re.search(street_name)
@@ -99,6 +97,7 @@ def audit_street_type(street_types, street_name):
 
 def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
+
 
 def audit(osmfile):
     osm_file = open(osmfile, "r")
@@ -113,16 +112,6 @@ def audit(osmfile):
 
 def update_name(name, mapping):
     '''Update each street name with the replacement ending in the mapping dictionary'''
-    match = re.search(street_type_re,name)
-    name = re.sub(street_type_re,mapping[match.group()],name)
-    return name
-
-def change_name(name, changes):
-    match = re.search(street_type_re,name)
-    name = re.sub(street_type_re,mapping[match.group()],name)
-    return name
-
-def delete_name(name, delete):
     match = re.search(street_type_re,name)
     name = re.sub(street_type_re,mapping[match.group()],name)
     return name
