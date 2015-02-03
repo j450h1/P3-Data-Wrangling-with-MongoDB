@@ -1,0 +1,23 @@
+---
+title: "References"
+author: "Jas Sohi"
+date: "Monday, February 02, 2015"
+output: pdf_document
+---
+###How to calculater number of keys per document
+http://stackoverflow.com/questions/8980145/mongodb-how-to-count-number-of-keys-in-a-document
+
+###JavaScript Regular Expressions
+http://www.w3schools.com/jsref/jsref_obj_regexp.asp
+
+###Piazza Post
+https://piazza.com/class/i23uptiifb6194?cid=656
+
+###$in operator
+http://docs.mongodb.org/manual/reference/operator/query/in/
+
+###How to import JSON file
+http://docs.mongodb.org/manual/reference/program/mongoimport/
+
+###How to import JSON file using json array
+http://stackoverflow.com/questions/18426239/how-to-import-json-file-in-mongodb/28263056#28263056
