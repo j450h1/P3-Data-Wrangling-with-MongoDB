@@ -112,9 +112,9 @@ def update_name(name, mapping):
         name = re.sub(street_type_re,mapping[match.group()],name)
     return name
 
-#file_in = 'GVRD - Vancouver - OSM XML Raw.osm' 
+file_in = 'GVRD - Vancouver - OSM XML Raw.osm' 
 #file_in = 'sample.osm'
-file_in = 'example.osm'
+#file_in = 'example.osm'
 
 def shape_element(element):
     """Takes a top level element or tag such as way, node, etc and iterates through each element
